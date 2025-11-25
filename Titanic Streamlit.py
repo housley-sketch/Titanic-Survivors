@@ -15,7 +15,7 @@ st.markdown("""
     html, body, .main, .stApp, [data-testid="stAppViewContainer"] {
         background: url('Titanic sinking.gif') no-repeat center center fixed !important;
         background-size: cover !important;
-        background-color: #0b1d3d !important;
+        background-color: #0b1d3d ;
     }
 
     /* Gentle dark overlay so text is readable */
