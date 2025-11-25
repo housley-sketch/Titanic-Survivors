@@ -6,6 +6,19 @@ import plotly.express as px
 
 st.set_page_config(page_title="R.M.S. Titanic", layout="centered")
 
+# ────── SINKING ANIMATION (NEW SECTION) ──────
+# Option 1: Full-width hero at the top (most dramatic — sinks into the wreck bg)
+st.image("titanic_sinking.gif", 
+         caption=None,  # No caption to keep it immersive
+         use_column_width=True)
+
+# Quick CSS tweak for overlay (add this inside your <style> block)
+.stImage > img {
+    opacity: 0.8;  /* Subtle fade so text pops */
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);  /* Gold glow edge */
+}
+
 # ────── DEEP-SEA SHIPWRECK BACKGROUND + PERFECT SCALING ──────
 st.markdown("""
 <style>
