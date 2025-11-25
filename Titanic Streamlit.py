@@ -91,7 +91,7 @@ st.image("Titanic sinking.gif", use_column_width=True)
 # ────── DATA ──────
 @st.cache_data
 def load_data():
-    df = pd.read_csv("https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv")
+    df = pd.read_csv("Titanic Age, Gender, Class CSV.csv")
     df = df[['Survived', 'Age', 'Sex', 'Pclass']].dropna(subset=['Age'])
     df.columns = ['Survived', 'Age', 'Sex', 'Class']
     df['Sex'] = df['Sex'].str.lower()
