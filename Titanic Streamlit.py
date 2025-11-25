@@ -11,9 +11,9 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Alegreya+Sans+SC:wght@400;700&display=swap');
 
-    /* Shipwreck background — only on the main page */
+    /* Sinking Titanic as full-page animated background */
     html, body, .main, .stApp, [data-testid="stAppViewContainer"] {
-        background: url('https://upload.wikimedia.org/wikipedia/commons/1/1b/Titanic_wreck_bow.jpg') no-repeat center center fixed !important;
+        background: url('Titanic sinking.gif') no-repeat center center fixed !important;
         background-size: cover !important;
         background-color: #0b1d3d !important;
     }
@@ -84,9 +84,6 @@ st.markdown("""
 </style>
 <div class="overlay"></div>
 """, unsafe_allow_html=True)
-
-# ────── SINKING ANIMATION ────── 
-st.image("Titanic sinking.gif", use_column_width=True)
 
 # ────── DATA ──────
 @st.cache_data
