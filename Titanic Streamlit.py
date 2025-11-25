@@ -13,9 +13,9 @@ st.markdown("""
 
     /* Sinking Titanic as full-page animated background */
     html, body, .main, .stApp, [data-testid="stAppViewContainer"] {
-        background: url('Titanic sinking.gif') no-repeat center center fixed !important;
-        background-size: cover ;
-        background-color: #0b1d3d ;
+        background: ('Titanic sinking.gif') no-repeat center center fixed !important;
+        background-size: cover !important;
+        background-color: #0b1d3d !important;
     }
 
     /* Gentle dark overlay so text is readable */
