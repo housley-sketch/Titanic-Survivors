@@ -1,0 +1,227 @@
+# titanic_nautical_dashboard.py
+import pandas as pd
+import plotly.express as px
+import dash
+from dash import dcc, html, Input, Output
+from pathlib import Path
+
+# ================== LOAD YOUR CSV – THE CORRECT WAY ==================
+file_path = r"Titanic Age, Gender, Class CSV.csv"
+
+# Try the normal, sane way first (99% of cases)
+df = pd.read_csv(file_path)
+
+# If that fails or columns look wrong, uncomment the line below instead:
+# df = pd.read_csv(file_path, sep='\s+', header=None, names=['Survived','Age','Sex','Class'])
+
+# Clean and standardize no matter what
+df.columns = df.columns.str.strip().str.lower()
+
+# Map column names just in case
+df.rename(columns={
+    'survived': 'Survived',
+    'age': 'Age',
+    'sex': 'Sex',
+    'pclass': 'Class',
+    'class': 'Class'
+}, inplace=True)
+
+# Now convert properly
+df['Survived'] = df['Survived'].map({'TRUE': 1, 'FALSE': 0, True:1, False:0, '1':1, '0':0, 1:1, 0:0}).fillna(0).astype(int)
+df['Age'] = pd.to_numeric(df['Age'], errors='coerce')
+df['Class'] = pd.to_numeric(df['Class'], errors='coerce').astype(int)
+df['Sex'] = df['Sex'].astype(str).str.lower()
+
+df.dropna(subset=['Age', 'Sex', 'Class', 'Survived'], inplace=True)
+df['Age'] = df['Age'].astype(int)
+
+print(f"Successfully loaded {len(df)} passengers. Ready to sail!")
+
+# ================== NAUTICAL DASH APP ==================
+app = dash.Dash(__name__, title="R.M.S. Titanic – Last Voyage Logbook")
+app.css.append_css({"external_url": "https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Alegreya+Sans+SC:wght@300;400;700&display=swap"})
+
+# Custom CSS – pure maritime swagger
+app.layout = html.Div(style={
+    'background': '#0b1d3d',
+    'min-height': '100vh',
+    'fontFamily': '"Alegreya Sans SC", sans-serif',
+    'color': 'white',
+    'position': 'relative',
+    'overflow': 'hidden'
+}, children=[
+
+    # === ANIMATED OCEAN BACKGROUND (fixed & bulletproof) ===
+    # ANIMATED OCEAN BACKGROUND (works in every version of Dash)
+    html.Div(style={
+        'position': 'fixed',
+        'top': 0, 'left': 0,
+        'width': '100%', 'height': '100%',
+        'background': 'linear-gradient(180deg, transparent 50%, rgba(10,30,60,0.6)), '
+                       'repeating-linear-gradient(0deg, '
+                       '#0b1d3d, #0b1d3d 50px, #0f2b47 50px, #0f2b47 100px)',
+        'backgroundSize': '100% 200%',
+        'animation': 'wave 40s linear infinite',
+        'zIndex': -2,
+        'pointerEvents': 'none'
+    }),
+
+    # CSS keyframes injected the only way that works everywhere
+    html.Div(
+        children = [
+            dcc.Markdown("""
+            <style>
+            @keyframes wave {
+                0%   { background-position: 0% 0%; }
+                100% { background-position: 0% 200%; }
+            }
+            </style>
+            """, dangerously_allow_html=True)
+        ],
+        style={'display': 'none'}  # hides it completely
+    ),
+
+    # Header with gold lettering and rope texture
+    html.Div([
+        html.H1("R.M.S. TITANIC", style={
+            'fontFamily': 'Cinzel, serif',
+            'fontSize': '4.5rem',
+            'textAlign': 'center',
+            'margin': '20px 0 0 0',
+            'background': 'linear-gradient(to bottom, #d4af37, #b8860b)',
+            '-webkit-background-clip': 'text',
+            '-webkit-text-fill-color': 'transparent',
+            'textShadow': '0 0 30px rgba(212,175,55,0.5)'
+        }),
+        html.H2("Survival Logbook – 14 April 1912", style={
+            'textAlign': 'center',
+            'fontSize': '1.8rem',
+            'letterSpacing': '4px',
+            'marginBottom': '30px',
+            'opacity': 0.9
+        })
+    ]),
+
+    # Controls in a weathered captain’s wheel panel
+    html.Div([
+        html.Div([
+            html.Label("🧭 Crew & Passengers", style={'fontSize': '1.4rem', 'fontWeight': 'bold'}),
+            dcc.Dropdown(id='gender-dropdown',
+                options=[
+                    {'label': 'All Souls Aboard', 'value': 'all'},
+                    {'label': 'Gentlemen', 'value': 'male'},
+                    {'label': 'Ladies', 'value': 'female'}
+                ],
+                value='all',
+                style={'backgroundColor': '#1b7a71', 'color': 'black', 'border': '2px solid #d4af37'},
+                className='dash-bootstrap-select'
+            ),
+        ], style={'margin': '15px'}),
+
+        html.Div([
+            html.Label("⚓ Passenger Class", style={'fontSize': '1.4rem', 'fontWeight': 'bold'}),
+            dcc.Dropdown(id='class-dropdown',
+                options=[
+                    {'label': 'All Decks', 'value': 'all'},
+                    {'label': 'First Class – Promenade Deck', 'value': 1},
+                    {'label': 'Second Class – Boat Deck', 'value': 2},
+                    {'label': 'Third Class – Lower Decks', 'value': 3}
+                ],
+                value='all',
+                style={'backgroundColor': '#1b7a71', 'color': 'black', 'border': '2px solid #d4af37'},
+                className='dash-bootstrap-select'
+                ),
+            ], style={'margin': '15px'}),
+
+        html.Div([
+            html.Label("⏳ Passenger Age (years)", style={'fontSize': '1.4rem', 'fontWeight': 'bold'}),
+            dcc.RangeSlider(
+                id='age-slider',
+                min=0, max=80, step=1,
+                marks={i: {'label': f"{i}", 'style': {'color': '#d4af37'}} for i in range(0,81,10)},
+                value=[0,80],
+                tooltip={'always_visible': True, 'placement': 'bottom'}
+            ),
+        ], style={'margin': '30px 20px', 'padding': '10px', 'background': 'rgba(15,43,71,0.7)', 'borderRadius': '12px',
+                  'border': '1px dashed #8b6914'})
+    ], style={
+        'maxWidth': '900px', 'margin': '0 auto', 'padding': '30px',
+        'background': 'rgba(11,29,61,0.85)',
+        'borderRadius': '20px',
+        'boxShadow': '0 10px 40px rgba(0,0,0,0.8)',
+        'border': '3px double #d4af37'
+    }),
+
+    # The main pie – now a captain’s compass rose
+    html.Div([
+        dcc.Graph(id='pie-chart', style={'height': '50vh'})
+    ], style={'marginTop': '40px'}),
+
+    # Footer with sea shanty quote
+    html.Footer([
+        html.P("“The sea is a cruel mistress, but she never lies.” – Captain Edward John Smith",
+               style={'textAlign': 'center', 'fontStyle': 'italic', 'marginTop': '50px', 'opacity': 0.7})
+    ])
+])
+
+# ================== CALLBACK – THE HEART OF THE SHIP ==================
+@app.callback(
+    Output('pie-chart', 'figure'),
+    Input('gender-dropdown', 'value'),
+    Input('class-dropdown', 'value'),
+    Input('age-slider', 'value')
+)
+def update_compass(gender, pclass, age_range):
+    d = df.copy()
+    if gender != 'all':
+        d = d[d['Sex'] == gender]
+    if pclass != 'all':
+        d = d[d['Class'] == int(pclass)]
+    d = d[d['Age'].between(age_range[0], age_range[1])]
+
+    survived = d['Survived'].sum()
+    perished = len(d) - survived
+    total = len(d)
+
+    fig = px.pie(
+        names=['Perished at Sea', 'Saved'],
+        values=[perished, survived],
+        hole=0.45,
+        color=['Perished at Sea', 'Saved'],
+        color_discrete_map={
+            'Perished at Sea': '#c41a1a',   # deep blood red
+            'Saved': '#ffd700'             # bright nautical gold
+        }
+    )
+
+    fig.update_traces(
+        textinfo='percent+value',
+        textfont_size=24,
+        textfont_color='#ffffff',
+        marker=dict(line=dict(color='#e8dccc', width=4))
+    )
+
+    fig.update_layout(
+        title={
+            'text': f"<b>{total} souls</b><br>"
+                    f"Age {age_range[0]}–{age_range[1]} | "
+                    f"{gender.capitalize() if gender!='all' else 'All aboard'} | "
+                    f"Class {pclass if pclass!='all' else 'Every deck'}",
+            'x': 0.5, 'xanchor': 'center',
+            'font': dict(size=20, family='Cinzel', color='#ffd700')
+        },
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        legend=dict(font=dict(size=20, color='#e8dccc'), orientation="h", y=-0.1),
+        annotations=[dict(
+            text=f"{survived}<br>Saved" if survived else "None<br>saved",
+            font=dict(size=52, color='#ffd700', family='Cinzel'),
+            showarrow=False
+        )]
+    )
+    return fig
+
+# ================== LAUNCH ==================
+if __name__ == '__main__':
+    print("Hoist the mainsail! The Titanic dashboard is sailing…")
+    app.run(debug=False, port=8050)
