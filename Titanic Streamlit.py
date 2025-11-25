@@ -120,12 +120,23 @@ saved = int(f['Survived'].sum())
 perished = len(f) - saved
 total = len(f)
 
-# ────── PERFECTLY SIZED PIE CHART ──────
+# ────── PERFECTLY SIZED PIE CHART (FIXED COLORS!) ──────
+# Force the order: Perished first, then Saved → so colors stay consistent
+data = pd.DataFrame({
+    "Fate": ["Perished at Sea", "Saved"],
+    "Count": [perished, saved]
+})
+
 fig = px.pie(
-    names=['Perished at Sea', 'Saved'],
-    values=[perished, saved],
+    data,
+    names="Fate",
+    values="Count",
     hole=0.5,
-    color_discrete_sequence=['#8b1a1a', '#ffd700']
+    color="Fate",  # This is the key!
+    color_discrete_map={   # ← LOCKS THE COLORS FOREVER
+        "Perished at Sea": "#8b1a1a",
+        "Saved": "#ffd700"
+    }
 )
 
 fig.update_traces(
@@ -136,7 +147,7 @@ fig.update_traces(
 )
 
 fig.update_layout(
-    height=680,                     # ← big, but not too big
+    height=680,
     margin=dict(t=100, b=80, l=40, r=40),
     title=f"<b>{total:,} souls</b><br>Age {age_range[0]}–{age_range[1]} • {gender or 'All'} • Class {pclass or 'All'}",
     title_x=0.5,
