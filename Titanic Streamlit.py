@@ -1,6 +1,5 @@
 # streamlit_titanic_final.py
 # python -m streamlit run "Streamlit Titanic dashboard.py"
-pip install plotly
 import streamlit as st
 import pandas as pd
 import plotly.express as px
