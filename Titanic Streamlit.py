@@ -86,7 +86,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ────── SINKING ANIMATION ────── 
-st.image("titanic_sinking.gif", use_column_width=True)
+st.image("Titanic sinking.gif", use_column_width=True)
 
 # ────── DATA ──────
 @st.cache_data
